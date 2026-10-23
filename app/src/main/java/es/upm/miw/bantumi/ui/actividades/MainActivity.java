@@ -55,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
     private BantumiViewModel bantumiVM;
     private Chronometer cronometro;
     private boolean cronometroIniciado = false;
+    private boolean finJuegoProcesado = false;
     int numInicialSemillas;
 
     @Override
@@ -216,6 +217,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void reiniciarPartidaConPreferencias() {
+        finJuegoProcesado = false;
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
         String strSemillas = pref.getString(getString(R.string.prefClaveNumSemillas), getString(R.string.prefDefaultNumSemillas));
         try {
@@ -405,6 +407,7 @@ public class MainActivity extends AppCompatActivity {
         try (BufferedReader fin = new BufferedReader(new InputStreamReader(openFileInput(file.getName())))) {
             String lineaEstado = fin.readLine();
             if (lineaEstado != null) {
+                finJuegoProcesado = false;
                 juegoBantumi.deserializa(lineaEstado);
                 marcarUltimaCasilla(-1);
                 Snackbar.make(findViewById(android.R.id.content), getString(R.string.txtPartidaRecuperadaOK), Snackbar.LENGTH_LONG).show();
@@ -420,23 +423,25 @@ public class MainActivity extends AppCompatActivity {
      * @param v Vista pulsada (hueco)
      */
     public void huecoPulsado(@NonNull View v) {
+        if (juegoBantumi.juegoTerminado()) {
+            return;
+        }
+
         iniciarCronometroSiNoIniciado();
         String resourceName = getResources().getResourceEntryName(v.getId()); // pXY
         int num = Integer.parseInt(resourceName.substring(resourceName.length() - 2));
         Log.i(LOG_TAG, "huecoPulsado(" + resourceName + ") num=" + num);
-        switch (juegoBantumi.turnoActual()) {
-            case turnoJ1:
-                Log.i(LOG_TAG, "* Juega Jugador");
-                juegoBantumi.jugar(num);
-                break;
-            case turnoJ2:
-                Log.i(LOG_TAG, "* Juega Computador");
-                juegoBantumi.juegaComputador();
-                break;
-            default:    // JUEGO TERMINADO
-                finJuego();
+
+        if (juegoBantumi.turnoActual() == JuegoBantumi.Turno.turnoJ1) {
+            Log.i(LOG_TAG, "* Juega Jugador");
+            juegoBantumi.jugar(num);
+        } else if (juegoBantumi.turnoActual() == JuegoBantumi.Turno.turnoJ2) {
+            Log.i(LOG_TAG, "* Juega Computador");
+            juegoBantumi.juegaComputador();
         }
+
         marcarUltimaCasilla(juegoBantumi.getUltimaCasillaJugada());
+
         if (juegoBantumi.juegoTerminado()) {
             finJuego();
         }
@@ -473,6 +478,11 @@ public class MainActivity extends AppCompatActivity {
      * El juego ha terminado. Volver a jugar?
      */
     private void finJuego() {
+        if (finJuegoProcesado) {
+            return;
+        }
+        finJuegoProcesado = true;
+
         if (cronometro != null) {
             cronometro.stop();
         }
