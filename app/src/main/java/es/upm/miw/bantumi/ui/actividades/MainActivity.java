@@ -1,6 +1,10 @@
 package es.upm.miw.bantumi.ui.actividades;
 
 import android.app.AlertDialog;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import androidx.preference.PreferenceManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -24,9 +28,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import android.content.Context;
-
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Locale;
+
+import es.upm.miw.bantumi.datos.Resultado;
+import es.upm.miw.bantumi.datos.ResultadoRepository;
 
 import es.upm.miw.bantumi.ui.fragmentos.FinalAlertDialog;
 import es.upm.miw.bantumi.ui.fragmentos.RecuperarAlertDialog;
@@ -55,10 +62,53 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // Instancia el ViewModel y el juego, y asigna observadores a los huecos
-        numInicialSemillas = getResources().getInteger(R.integer.intNumInicialSemillas);
         bantumiVM = new ViewModelProvider(this).get(BantumiViewModel.class);
-        juegoBantumi = new JuegoBantumi(bantumiVM, JuegoBantumi.Turno.turnoJ1, numInicialSemillas);
+
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+        String strSemillas = pref.getString(getString(R.string.prefClaveNumSemillas), getString(R.string.prefDefaultNumSemillas));
+        try {
+            numInicialSemillas = Integer.parseInt(strSemillas);
+        } catch (NumberFormatException e) {
+            numInicialSemillas = getResources().getInteger(R.integer.intNumInicialSemillas);
+        }
+        String primerTurnoStr = pref.getString(getString(R.string.prefClavePrimerTurno), getString(R.string.prefDefaultPrimerTurno));
+        JuegoBantumi.Turno turnoInicial = "J2".equals(primerTurnoStr) ? JuegoBantumi.Turno.turnoJ2 : JuegoBantumi.Turno.turnoJ1;
+
+        juegoBantumi = new JuegoBantumi(bantumiVM, turnoInicial, numInicialSemillas);
         crearObservadores();
+        actualizarNombreJugador();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        actualizarNombreJugador();
+    }
+
+    private void actualizarNombreJugador() {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+        String nombre = pref.getString(
+                getString(R.string.prefClaveNombreJugador),
+                getString(R.string.prefDefaultNombreJugador)
+        );
+        TextView tvPlayer1 = findViewById(R.id.tvPlayer1);
+        if (tvPlayer1 != null && nombre != null && !nombre.trim().isEmpty()) {
+            tvPlayer1.setText(nombre);
+        }
+    }
+
+    public void reiniciarPartidaConPreferencias() {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+        String strSemillas = pref.getString(getString(R.string.prefClaveNumSemillas), getString(R.string.prefDefaultNumSemillas));
+        try {
+            numInicialSemillas = Integer.parseInt(strSemillas);
+        } catch (NumberFormatException e) {
+            numInicialSemillas = getResources().getInteger(R.integer.intNumInicialSemillas);
+        }
+        String primerTurnoStr = pref.getString(getString(R.string.prefClavePrimerTurno), getString(R.string.prefDefaultPrimerTurno));
+        JuegoBantumi.Turno turnoInicial = "J2".equals(primerTurnoStr) ? JuegoBantumi.Turno.turnoJ2 : JuegoBantumi.Turno.turnoJ1;
+
+        juegoBantumi.inicializar(turnoInicial, numInicialSemillas);
     }
 
     /**
@@ -151,8 +201,10 @@ public class MainActivity extends AppCompatActivity {
             guardarPartida();
         } else if (itemId == R.id.opcRecuperarPartida) {
             recuperarPartida();
-        // } else if (itemId == R.id.opcAjustes) { // @TODO Preferencias
-            // startActivity(new Intent(this, BantumiPrefs.class));
+        } else if (itemId == R.id.opcMejoresResultados) {
+            startActivity(new Intent(this, MejoresResultadosActivity.class));
+        } else if (itemId == R.id.opcAjustes) {
+            startActivity(new Intent(this, BantumiPrefsActivity.class));
         } else {
             Snackbar.make(
                     findViewById(android.R.id.content),
@@ -232,16 +284,44 @@ public class MainActivity extends AppCompatActivity {
      * El juego ha terminado. Volver a jugar?
      */
     private void finJuego() {
-        String texto = (juegoBantumi.getSemillas(6) > 6 * numInicialSemillas)
-                ? "Gana Jugador 1"
-                : "Gana Jugador 2";
-        if (juegoBantumi.getSemillas(6) == 6 * numInicialSemillas) {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+        String nombreJugador = pref.getString(
+                getString(R.string.prefClaveNombreJugador),
+                getString(R.string.prefDefaultNombreJugador)
+        );
+
+        int semillasJ1 = juegoBantumi.getSemillas(6);
+        int semillasJ2 = juegoBantumi.getSemillas(13);
+
+        String texto;
+        if (semillasJ1 > semillasJ2) {
+            texto = "Gana " + nombreJugador;
+        } else if (semillasJ2 > semillasJ1) {
+            texto = "Gana Jugador 2";
+        } else {
             texto = "¡¡¡ EMPATE !!!";
         }
 
-        // @TODO guardar puntuación
+        guardarPuntuacionBD();
 
         // terminar
         new FinalAlertDialog(texto).show(getSupportFragmentManager(), "ALERT_DIALOG");
+    }
+
+    private void guardarPuntuacionBD() {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+        String nombreJugador = pref.getString(
+                getString(R.string.prefClaveNombreJugador),
+                getString(R.string.prefDefaultNombreJugador)
+        );
+
+        String fechaActual = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(new Date());
+
+        int semillasJ1 = juegoBantumi.getSemillas(6);
+        int semillasJ2 = juegoBantumi.getSemillas(13);
+
+        Resultado resultado = new Resultado(nombreJugador, fechaActual, semillasJ1, semillasJ2);
+        ResultadoRepository repository = new ResultadoRepository(this);
+        repository.insert(resultado);
     }
 }

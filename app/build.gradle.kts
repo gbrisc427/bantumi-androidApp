@@ -37,6 +37,9 @@ dependencies {
 	
     implementation(libs.constraintLayout)
 
+    // Preference
+    implementation("androidx.preference:preference:1.2.1")
+
     // ViewModel
     implementation(libs.androidx.lifecycle.viewmodel)
 
@@ -44,4 +47,9 @@ dependencies {
     implementation(libs.androidx.lifecycle.livedata)
 
     implementation(libs.androidx.lifecycle.livedata.core)
+
+    // Room
+    val roomVersion = "2.6.1"
+    implementation("androidx.room:room-runtime:$roomVersion")
+    annotationProcessor("androidx.room:room-compiler:$roomVersion")
 }

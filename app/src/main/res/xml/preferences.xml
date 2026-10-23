@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory app:title="@string/prefTituloCategoria1">
+        <EditTextPreference
+            app:key="@string/prefClaveNombreJugador"
+            app:title="@string/prefTituloNombreJugador"
+            app:summary="@string/prefTextoNombreJugador"
+            app:defaultValue="@string/prefDefaultNombreJugador"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/prefTituloCategoria2">
+        <ListPreference
+            app:key="@string/prefClaveNumSemillas"
+            app:title="@string/prefTituloNumSemillas"
+            app:entries="@array/prefNumSemillasEntries"
+            app:entryValues="@array/prefNumSemillasValues"
+            app:defaultValue="@string/prefDefaultNumSemillas"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            app:key="@string/prefClavePrimerTurno"
+            app:title="@string/prefTituloPrimerTurno"
+            app:entries="@array/prefPrimerTurnoEntries"
+            app:entryValues="@array/prefPrimerTurnoValues"
+            app:defaultValue="@string/prefDefaultPrimerTurno"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

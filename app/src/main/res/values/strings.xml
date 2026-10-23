@@ -40,7 +40,15 @@
     <string name="prefTituloCategoria1">Datos personales</string>
     <string name="prefTituloNombreJugador">Nombre del jugador</string>
     <string name="prefTextoNombreJugador">Pulse para teclear el nombre del jugador</string>
+    <string name="prefClaveNombreJugador">nombre_jugador</string>
+    <string name="prefDefaultNombreJugador">Jugador 1</string>
     <string name="prefTituloCategoria2">Ajustes del juego</string>
+    <string name="prefTituloNumSemillas">Número inicial de semillas</string>
+    <string name="prefClaveNumSemillas">num_semillas_iniciales</string>
+    <string name="prefDefaultNumSemillas">4</string>
+    <string name="prefTituloPrimerTurno">Jugador que empieza</string>
+    <string name="prefClavePrimerTurno">primer_jugador</string>
+    <string name="prefDefaultPrimerTurno">J1</string>
     <string name="prefTituloCategoria3">Más información…</string>
 
     <!-- Diálogo Final -->
@@ -58,5 +66,12 @@
     <string name="txtPartidaNoExiste">No existe ninguna partida guardada</string>
     <string name="txtDialogoRecuperarTitulo">Recuperar partida</string>
     <string name="txtDialogoRecuperarPregunta">La partida actual ha sido modificada. ¿Desea sobrescribirla y recuperar la partida guardada?</string>
+
+    <!-- Mejores Resultados -->
+    <string name="txtSinResultados">No hay resultados registrados todavía.</string>
+    <string name="txtEliminarResultados">Eliminar resultados</string>
+    <string name="txtDialogoEliminarTitulo">Eliminar todos los resultados</string>
+    <string name="txtDialogoEliminarPregunta">¿Está seguro de que desea eliminar todos los resultados guardados?</string>
+    <string name="txtResultadosEliminadosOK">Resultados eliminados correctamente</string>
 
 </resources>

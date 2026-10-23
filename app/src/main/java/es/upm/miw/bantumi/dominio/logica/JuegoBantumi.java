@@ -20,7 +20,7 @@ public class JuegoBantumi {
     }
 
     // Número inicial de semillas
-    private final int numInicialSemillas;
+    private int numInicialSemillas;
 
     /**
      * <b>Constructor</b><br>
@@ -69,6 +69,17 @@ public class JuegoBantumi {
                             ? 0
                             : numInicialSemillas
             );
+        if (turno == Turno.turnoJ2) {
+            juegaComputador();
+        }
+    }
+
+    /**
+     * Inicializa con número específico de semillas
+     */
+    public void inicializar(Turno turno, int numInicialSemillas) {
+        this.numInicialSemillas = numInicialSemillas;
+        inicializar(turno);
     }
 
     /**
