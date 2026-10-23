@@ -483,10 +483,6 @@ public class MainActivity extends AppCompatActivity {
         }
         finJuegoProcesado = true;
 
-        if (cronometro != null) {
-            cronometro.stop();
-        }
-
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
         String nombreJugador = pref.getString(
                 getString(R.string.prefClaveNombreJugador),
@@ -506,6 +502,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         guardarPuntuacionBD();
+        resetCronometro();
 
         // terminar
         new FinalAlertDialog(texto).show(getSupportFragmentManager(), "ALERT_DIALOG");
