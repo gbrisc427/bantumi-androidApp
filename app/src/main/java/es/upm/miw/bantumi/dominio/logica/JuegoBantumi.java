@@ -199,13 +199,36 @@ public class JuegoBantumi {
     }
 
     /**
+     * @return true si la partida actual ha sufrido cambios respecto al estado inicial
+     */
+    public boolean estaModificado() {
+        if (turnoActual() != Turno.turnoJ1) {
+            return true;
+        }
+        for (int i = 0; i < NUM_POSICIONES; i++) {
+            int esperadas = (i == 6 || i == 13) ? 0 : numInicialSemillas;
+            if (getSemillas(i) != esperadas) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Devuelve una cadena que representa el estado completo del juego
      *
      * @return juego serializado
      */
     public String serializa() {
-        // @TODO
-        return null;
+        StringBuilder sb = new StringBuilder();
+        sb.append(turnoActual().name()).append(";");
+        for (int i = 0; i < NUM_POSICIONES; i++) {
+            sb.append(getSemillas(i));
+            if (i < NUM_POSICIONES - 1) {
+                sb.append(";");
+            }
+        }
+        return sb.toString();
     }
 
     /**
@@ -214,6 +237,14 @@ public class JuegoBantumi {
      * @param juegoSerializado cadena que representa el estado completo del juego
      */
     public void deserializa(String juegoSerializado) {
-        // @TODO
+        if (juegoSerializado != null && !juegoSerializado.isEmpty()) {
+            String[] parts = juegoSerializado.split(";");
+            if (parts.length == NUM_POSICIONES + 1) {
+                setTurno(Turno.valueOf(parts[0]));
+                for (int i = 0; i < NUM_POSICIONES; i++) {
+                    setSemillas(i, Integer.parseInt(parts[i + 1]));
+                }
+            }
+        }
     }
 }

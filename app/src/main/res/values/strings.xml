@@ -47,4 +47,16 @@
     <string name="txtDialogoFinalTitulo">Fin del juego</string>
     <string name="txtDialogoFinalPregunta">¿Desea jugar otra partida?</string>
 
+    <!-- Diálogo Reiniciar -->
+    <string name="txtDialogoReiniciarTitulo">Reiniciar partida</string>
+    <string name="txtDialogoReiniciarPregunta">¿Desea reiniciar la partida actual?</string>
+
+    <!-- Guardar y Recuperar -->
+    <string name="txtPartidaGuardadaOK">Partida guardada correctamente</string>
+    <string name="txtPartidaErrorGuardar">Error al guardar la partida</string>
+    <string name="txtPartidaRecuperadaOK">Partida recuperada correctamente</string>
+    <string name="txtPartidaNoExiste">No existe ninguna partida guardada</string>
+    <string name="txtDialogoRecuperarTitulo">Recuperar partida</string>
+    <string name="txtDialogoRecuperarPregunta">La partida actual ha sido modificada. ¿Desea sobrescribirla y recuperar la partida guardada?</string>
+
 </resources>
