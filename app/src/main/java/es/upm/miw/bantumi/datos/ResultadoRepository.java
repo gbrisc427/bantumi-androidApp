@@ -36,6 +36,20 @@ public class ResultadoRepository {
         });
     }
 
+    public void getTop10PorJugador1(Callback<List<Resultado>> callback) {
+        executor.execute(() -> {
+            List<Resultado> lista = resultadoDao.getTop10PorJugador1();
+            mainHandler.post(() -> callback.onResult(lista));
+        });
+    }
+
+    public void getResultadosPorNombre(String nombre, Callback<List<Resultado>> callback) {
+        executor.execute(() -> {
+            List<Resultado> lista = resultadoDao.getResultadosPorNombre(nombre);
+            mainHandler.post(() -> callback.onResult(lista));
+        });
+    }
+
     public void deleteAll(Runnable callback) {
         executor.execute(() -> {
             resultadoDao.deleteAll();

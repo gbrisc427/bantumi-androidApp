@@ -22,6 +22,12 @@ public class JuegoBantumi {
     // Número inicial de semillas
     private int numInicialSemillas;
 
+    private int ultimaCasillaJugada = -1;
+
+    public int getUltimaCasillaJugada() {
+        return ultimaCasillaJugada;
+    }
+
     /**
      * <b>Constructor</b><br>
      * Inicializa el modelo sólo si éste está vacío
@@ -96,6 +102,7 @@ public class JuegoBantumi {
         )
             return;
         Log.i("MiW", String.format("jugar(%02d)", pos));
+        this.ultimaCasillaJugada = pos;
 
         // Recoger semillas en posición pos
         int nSemillasHueco, numSemillas = getSemillas(pos);

@@ -27,7 +27,7 @@ public class RecuperarAlertDialog extends DialogFragment {
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                main.recuperarPartidaConfirmado();
+                                main.recuperarPartidaSeleccion();
                             }
                         }
                 )

@@ -23,4 +23,24 @@
         <item>J1</item>
         <item>J2</item>
     </string-array>
+
+    <string-array name="filtroOrdenEntries">
+        <item>Top Máximo</item>
+        <item>Top Jugador 1</item>
+    </string-array>
+
+    <string-array name="prefColorEntries">
+        <item>Estándar (Predeterminado)</item>
+        <item>Rojo</item>
+        <item>Verde</item>
+        <item>Morado</item>
+        <item>Multicolor</item>
+    </string-array>
+    <string-array name="prefColorValues">
+        <item>standard</item>
+        <item>red</item>
+        <item>green</item>
+        <item>purple</item>
+        <item>multicolor</item>
+    </string-array>
 </resources>

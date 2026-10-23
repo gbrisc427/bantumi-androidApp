@@ -5,11 +5,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import androidx.preference.PreferenceManager;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Chronometer;
+import android.widget.EditText;
+import android.os.SystemClock;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
@@ -29,6 +34,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
 
@@ -47,6 +53,8 @@ public class MainActivity extends AppCompatActivity {
     protected final String LOG_TAG = "MiW";
     public JuegoBantumi juegoBantumi;
     private BantumiViewModel bantumiVM;
+    private Chronometer cronometro;
+    private boolean cronometroIniciado = false;
     int numInicialSemillas;
 
     @Override
@@ -77,12 +85,122 @@ public class MainActivity extends AppCompatActivity {
         juegoBantumi = new JuegoBantumi(bantumiVM, turnoInicial, numInicialSemillas);
         crearObservadores();
         actualizarNombreJugador();
+        aplicarColorTema();
+
+        cronometro = findViewById(R.id.cronometro);
+        resetCronometro();
+        if (turnoInicial == JuegoBantumi.Turno.turnoJ2) {
+            iniciarCronometroSiNoIniciado();
+        }
+    }
+
+    public void iniciarCronometroSiNoIniciado() {
+        if (!cronometroIniciado && cronometro != null) {
+            cronometro.setBase(SystemClock.elapsedRealtime());
+            cronometro.start();
+            cronometroIniciado = true;
+        }
+    }
+
+    public void resetCronometro() {
+        cronometroIniciado = false;
+        if (cronometro != null) {
+            cronometro.stop();
+            cronometro.setBase(SystemClock.elapsedRealtime());
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         actualizarNombreJugador();
+        aplicarColorTema();
+    }
+
+    private void aplicarColorTema() {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+        String colorTheme = pref.getString(getString(R.string.prefClaveColor), getString(R.string.prefDefaultColor));
+
+        int storeColor;
+        int[] buttonColorsJ1 = new int[6];
+        int[] buttonColorsJ2 = new int[6];
+
+        switch (colorTheme) {
+            case "red":
+                storeColor = Color.parseColor("#D32F2F"); // Red 700
+                int redJ1 = Color.parseColor("#E57373");   // Red 300
+                int redJ2 = Color.parseColor("#C62828");   // Red 800
+                Arrays.fill(buttonColorsJ1, redJ1);
+                Arrays.fill(buttonColorsJ2, redJ2);
+                break;
+            case "green":
+                storeColor = Color.parseColor("#2E7D32"); // Green 800
+                int greenJ1 = Color.parseColor("#81C784"); // Green 300
+                int greenJ2 = Color.parseColor("#1B5E20"); // Green 900
+                Arrays.fill(buttonColorsJ1, greenJ1);
+                Arrays.fill(buttonColorsJ2, greenJ2);
+                break;
+            case "purple":
+                storeColor = Color.parseColor("#6A1B9A"); // Purple 800
+                int purpleJ1 = Color.parseColor("#BA68C8"); // Purple 300
+                int purpleJ2 = Color.parseColor("#4A148C"); // Purple 900
+                Arrays.fill(buttonColorsJ1, purpleJ1);
+                Arrays.fill(buttonColorsJ2, purpleJ2);
+                break;
+            case "multicolor":
+                storeColor = Color.parseColor("#E91E63"); // Pink 500
+                int[] multiColors = new int[]{
+                        Color.parseColor("#F44336"), // Red
+                        Color.parseColor("#FF9800"), // Orange
+                        Color.parseColor("#FFEB3B"), // Yellow
+                        Color.parseColor("#4CAF50"), // Green
+                        Color.parseColor("#2196F3"), // Blue
+                        Color.parseColor("#9C27B0")  // Purple
+                };
+                for (int i = 0; i < 6; i++) {
+                    buttonColorsJ1[i] = multiColors[i];
+                    buttonColorsJ2[i] = multiColors[5 - i];
+                }
+                break;
+            case "standard":
+            default:
+                storeColor = getColor(R.color.teal_700);
+                int defaultColor = Color.parseColor("#8A5000");
+                Arrays.fill(buttonColorsJ1, defaultColor);
+                Arrays.fill(buttonColorsJ2, defaultColor);
+                break;
+        }
+
+        // Aplicar color a los depósitos y cronómetro
+        TextView store06 = findViewById(R.id.casilla_06);
+        TextView store13 = findViewById(R.id.casilla_13);
+        if (store06 != null) store06.setTextColor(storeColor);
+        if (store13 != null) store13.setTextColor(storeColor);
+        if (cronometro != null) cronometro.setTextColor(storeColor);
+
+        // Aplicar color a las casillas de Jugador 1 (00 .. 05)
+        for (int i = 0; i < 6; i++) {
+            String idBotonStr = String.format(Locale.getDefault(), "casilla_%02d", i);
+            int idBoton = getResources().getIdentifier(idBotonStr, "id", getPackageName());
+            if (idBoton != 0) {
+                View btn = findViewById(idBoton);
+                if (btn != null) {
+                    btn.setBackgroundTintList(ColorStateList.valueOf(buttonColorsJ1[i]));
+                }
+            }
+        }
+
+        // Aplicar color a las casillas de Jugador 2 (07 .. 12)
+        for (int i = 7; i <= 12; i++) {
+            String idBotonStr = String.format(Locale.getDefault(), "casilla_%02d", i);
+            int idBoton = getResources().getIdentifier(idBotonStr, "id", getPackageName());
+            if (idBoton != 0) {
+                View btn = findViewById(idBoton);
+                if (btn != null) {
+                    btn.setBackgroundTintList(ColorStateList.valueOf(buttonColorsJ2[i - 7]));
+                }
+            }
+        }
     }
 
     private void actualizarNombreJugador() {
@@ -108,7 +226,12 @@ public class MainActivity extends AppCompatActivity {
         String primerTurnoStr = pref.getString(getString(R.string.prefClavePrimerTurno), getString(R.string.prefDefaultPrimerTurno));
         JuegoBantumi.Turno turnoInicial = "J2".equals(primerTurnoStr) ? JuegoBantumi.Turno.turnoJ2 : JuegoBantumi.Turno.turnoJ1;
 
+        resetCronometro();
+
         juegoBantumi.inicializar(turnoInicial, numInicialSemillas);
+        if (turnoInicial == JuegoBantumi.Turno.turnoJ2) {
+            iniciarCronometroSiNoIniciado();
+        }
     }
 
     /**
@@ -198,9 +321,9 @@ public class MainActivity extends AppCompatActivity {
         } else if (itemId == R.id.opcReiniciarPartida) {
             new ReiniciarAlertDialog().show(getSupportFragmentManager(), "ALERT_DIALOG_REINICIAR");
         } else if (itemId == R.id.opcGuardarPartida) {
-            guardarPartida();
+            guardarPartidaConNombre();
         } else if (itemId == R.id.opcRecuperarPartida) {
-            recuperarPartida();
+            recuperarPartidaSeleccion();
         } else if (itemId == R.id.opcMejoresResultados) {
             startActivity(new Intent(this, MejoresResultadosActivity.class));
         } else if (itemId == R.id.opcAjustes) {
@@ -215,38 +338,75 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    private static final String FICHERO_PARTIDA = "partida_guardada.txt";
+    public void guardarPartidaConNombre() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.txtOpcionGuardar);
 
-    public void guardarPartida() {
-        try (FileOutputStream fos = openFileOutput(FICHERO_PARTIDA, Context.MODE_PRIVATE)) {
-            String datos = juegoBantumi.serializa();
-            fos.write(datos.getBytes());
-            Snackbar.make(findViewById(android.R.id.content), getString(R.string.txtPartidaGuardadaOK), Snackbar.LENGTH_LONG).show();
-        } catch (IOException e) {
-            Log.e(LOG_TAG, "Error al guardar partida", e);
-            Snackbar.make(findViewById(android.R.id.content), getString(R.string.txtPartidaErrorGuardar), Snackbar.LENGTH_LONG).show();
-        }
+        final EditText input = new EditText(this);
+        input.setHint("Nombre de la partida");
+        String defaultName = "Partida " + new SimpleDateFormat("dd/MM HH:mm", Locale.getDefault()).format(new Date());
+        input.setText(defaultName);
+        builder.setView(input);
+
+        builder.setPositiveButton(android.R.string.ok, (dialog, which) -> {
+            String nombrePartida = input.getText().toString().trim();
+            if (nombrePartida.isEmpty()) {
+                nombrePartida = defaultName;
+            }
+            String nombreFichero = "partida_" + nombrePartida.replaceAll("[^a-zA-Z0-9_-]", "_") + ".txt";
+            try (FileOutputStream fos = openFileOutput(nombreFichero, Context.MODE_PRIVATE)) {
+                String datos = juegoBantumi.serializa() + "\n" + (cronometro != null ? cronometro.getText().toString() : "00:00");
+                fos.write(datos.getBytes());
+                Snackbar.make(findViewById(android.R.id.content), getString(R.string.txtPartidaGuardadaOK), Snackbar.LENGTH_LONG).show();
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "Error al guardar partida", e);
+                Snackbar.make(findViewById(android.R.id.content), getString(R.string.txtPartidaErrorGuardar), Snackbar.LENGTH_LONG).show();
+            }
+        });
+        builder.setNegativeButton(android.R.string.cancel, null);
+        builder.show();
     }
 
-    public void recuperarPartida() {
-        File file = getFileStreamPath(FICHERO_PARTIDA);
-        if (!file.exists()) {
+    public void recuperarPartidaSeleccion() {
+        File filesDir = getFilesDir();
+        File[] matchingFiles = filesDir.listFiles((dir, name) -> name.startsWith("partida_") && name.endsWith(".txt"));
+
+        if (matchingFiles == null || matchingFiles.length == 0) {
             Snackbar.make(findViewById(android.R.id.content), getString(R.string.txtPartidaNoExiste), Snackbar.LENGTH_LONG).show();
             return;
         }
 
-        if (juegoBantumi.estaModificado()) {
-            new RecuperarAlertDialog().show(getSupportFragmentManager(), "ALERT_DIALOG_RECUPERAR");
-        } else {
-            recuperarPartidaConfirmado();
+        String[] nombresPartidas = new String[matchingFiles.length];
+        for (int i = 0; i < matchingFiles.length; i++) {
+            String fname = matchingFiles[i].getName();
+            nombresPartidas[i] = fname.substring(8, fname.length() - 4).replace("_", " ");
         }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.txtOpcionRecuperar);
+        builder.setItems(nombresPartidas, (dialog, which) -> {
+            File selectedFile = matchingFiles[which];
+            if (juegoBantumi.estaModificado()) {
+                new AlertDialog.Builder(this)
+                        .setTitle(R.string.txtDialogoRecuperarTitulo)
+                        .setMessage(R.string.txtDialogoRecuperarPregunta)
+                        .setPositiveButton(android.R.string.ok, (d, w) -> cargarPartidaDesdeFichero(selectedFile))
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .show();
+            } else {
+                cargarPartidaDesdeFichero(selectedFile);
+            }
+        });
+        builder.setNegativeButton(android.R.string.cancel, null);
+        builder.show();
     }
 
-    public void recuperarPartidaConfirmado() {
-        try (BufferedReader fin = new BufferedReader(new InputStreamReader(openFileInput(FICHERO_PARTIDA)))) {
-            String linea = fin.readLine();
-            if (linea != null) {
-                juegoBantumi.deserializa(linea);
+    private void cargarPartidaDesdeFichero(File file) {
+        try (BufferedReader fin = new BufferedReader(new InputStreamReader(openFileInput(file.getName())))) {
+            String lineaEstado = fin.readLine();
+            if (lineaEstado != null) {
+                juegoBantumi.deserializa(lineaEstado);
+                marcarUltimaCasilla(-1);
                 Snackbar.make(findViewById(android.R.id.content), getString(R.string.txtPartidaRecuperadaOK), Snackbar.LENGTH_LONG).show();
             }
         } catch (IOException e) {
@@ -260,6 +420,7 @@ public class MainActivity extends AppCompatActivity {
      * @param v Vista pulsada (hueco)
      */
     public void huecoPulsado(@NonNull View v) {
+        iniciarCronometroSiNoIniciado();
         String resourceName = getResources().getResourceEntryName(v.getId()); // pXY
         int num = Integer.parseInt(resourceName.substring(resourceName.length() - 2));
         Log.i(LOG_TAG, "huecoPulsado(" + resourceName + ") num=" + num);
@@ -275,8 +436,36 @@ public class MainActivity extends AppCompatActivity {
             default:    // JUEGO TERMINADO
                 finJuego();
         }
+        marcarUltimaCasilla(juegoBantumi.getUltimaCasillaJugada());
         if (juegoBantumi.juegoTerminado()) {
             finJuego();
+        }
+    }
+
+    private int ultimaCasillaMarcada = -1;
+
+    public void marcarUltimaCasilla(int pos) {
+        if (ultimaCasillaMarcada != -1) {
+            String idAnterior = String.format(Locale.getDefault(), "%02d", ultimaCasillaMarcada);
+            int idBotonAnterior = getResources().getIdentifier("casilla_" + idAnterior, "id", getPackageName());
+            if (idBotonAnterior != 0) {
+                View btnAnterior = findViewById(idBotonAnterior);
+                if (btnAnterior != null) {
+                    btnAnterior.setAlpha(1.0f);
+                }
+            }
+        }
+
+        ultimaCasillaMarcada = pos;
+        if (pos >= 0) {
+            String idActual = String.format(Locale.getDefault(), "%02d", pos);
+            int idBotonActual = getResources().getIdentifier("casilla_" + idActual, "id", getPackageName());
+            if (idBotonActual != 0) {
+                View btnActual = findViewById(idBotonActual);
+                if (btnActual != null) {
+                    btnActual.setAlpha(0.5f);
+                }
+            }
         }
     }
 
@@ -284,6 +473,10 @@ public class MainActivity extends AppCompatActivity {
      * El juego ha terminado. Volver a jugar?
      */
     private void finJuego() {
+        if (cronometro != null) {
+            cronometro.stop();
+        }
+
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
         String nombreJugador = pref.getString(
                 getString(R.string.prefClaveNombreJugador),
@@ -316,11 +509,12 @@ public class MainActivity extends AppCompatActivity {
         );
 
         String fechaActual = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(new Date());
+        String tiempoTexto = (cronometro != null) ? cronometro.getText().toString() : "00:00";
 
         int semillasJ1 = juegoBantumi.getSemillas(6);
         int semillasJ2 = juegoBantumi.getSemillas(13);
 
-        Resultado resultado = new Resultado(nombreJugador, fechaActual, semillasJ1, semillasJ2);
+        Resultado resultado = new Resultado(nombreJugador, fechaActual, semillasJ1, semillasJ2, tiempoTexto);
         ResultadoRepository repository = new ResultadoRepository(this);
         repository.insert(resultado);
     }

@@ -38,6 +38,12 @@ public class ResultadosAdapter extends RecyclerView.Adapter<ResultadosAdapter.Vi
         holder.tvNombreJugador.setText(res.getNombreJugador());
         holder.tvFecha.setText(res.getFecha());
         holder.tvPuntuacion.setText(res.getSemillasJ1() + " - " + res.getSemillasJ2());
+        if (res.getTiempo() != null && !res.getTiempo().isEmpty()) {
+            holder.tvTiempo.setText("Tiempo: " + res.getTiempo());
+            holder.tvTiempo.setVisibility(View.VISIBLE);
+        } else {
+            holder.tvTiempo.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -46,7 +52,7 @@ public class ResultadosAdapter extends RecyclerView.Adapter<ResultadosAdapter.Vi
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvPosicion, tvNombreJugador, tvFecha, tvPuntuacion;
+        TextView tvPosicion, tvNombreJugador, tvFecha, tvPuntuacion, tvTiempo;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -54,6 +60,7 @@ public class ResultadosAdapter extends RecyclerView.Adapter<ResultadosAdapter.Vi
             tvNombreJugador = itemView.findViewById(R.id.tvNombreJugador);
             tvFecha = itemView.findViewById(R.id.tvFecha);
             tvPuntuacion = itemView.findViewById(R.id.tvPuntuacion);
+            tvTiempo = itemView.findViewById(R.id.tvTiempo);
         }
     }
 }

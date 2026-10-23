@@ -22,14 +22,18 @@ public class Resultado {
     @ColumnInfo(name = "semillas_j2")
     public int semillasJ2;
 
+    @ColumnInfo(name = "tiempo")
+    public String tiempo;
+
     public Resultado() {
     }
 
-    public Resultado(String nombreJugador, String fecha, int semillasJ1, int semillasJ2) {
+    public Resultado(String nombreJugador, String fecha, int semillasJ1, int semillasJ2, String tiempo) {
         this.nombreJugador = nombreJugador;
         this.fecha = fecha;
         this.semillasJ1 = semillasJ1;
         this.semillasJ2 = semillasJ2;
+        this.tiempo = tiempo;
     }
 
     public int getId() {
@@ -70,6 +74,14 @@ public class Resultado {
 
     public void setSemillasJ2(int semillasJ2) {
         this.semillasJ2 = semillasJ2;
+    }
+
+    public String getTiempo() {
+        return tiempo;
+    }
+
+    public void setTiempo(String tiempo) {
+        this.tiempo = tiempo;
     }
 
     public int getMaxSemillas() {

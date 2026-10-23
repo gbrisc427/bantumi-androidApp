@@ -6,7 +6,7 @@ import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
-@Database(entities = {Resultado.class}, version = 1, exportSchema = false)
+@Database(entities = {Resultado.class}, version = 2, exportSchema = false)
 public abstract class BantumiDatabase extends RoomDatabase {
 
     private static volatile BantumiDatabase INSTANCE;
@@ -21,7 +21,9 @@ public abstract class BantumiDatabase extends RoomDatabase {
                             context.getApplicationContext(),
                             BantumiDatabase.class,
                             "bantumi_database"
-                    ).build();
+                    )
+                    .fallbackToDestructiveMigration()
+                    .build();
                 }
             }
         }

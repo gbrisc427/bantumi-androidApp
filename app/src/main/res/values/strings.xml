@@ -49,6 +49,9 @@
     <string name="prefTituloPrimerTurno">Jugador que empieza</string>
     <string name="prefClavePrimerTurno">primer_jugador</string>
     <string name="prefDefaultPrimerTurno">J1</string>
+    <string name="prefTituloColor">Color del tema</string>
+    <string name="prefClaveColor">color_tema</string>
+    <string name="prefDefaultColor">standard</string>
     <string name="prefTituloCategoria3">Más información…</string>
 
     <!-- Diálogo Final -->

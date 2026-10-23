@@ -1,9 +1,15 @@
 package es.upm.miw.bantumi.ui.actividades;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -15,7 +21,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.snackbar.Snackbar;
 
+import java.util.List;
+
 import es.upm.miw.bantumi.R;
+import es.upm.miw.bantumi.datos.Resultado;
 import es.upm.miw.bantumi.datos.ResultadoRepository;
 import es.upm.miw.bantumi.ui.adapters.ResultadosAdapter;
 
@@ -46,11 +55,48 @@ public class MejoresResultadosActivity extends AppCompatActivity {
 
         repository = new ResultadoRepository(this);
 
+        EditText etBuscar = findViewById(R.id.etBuscarNombre);
+        Spinner spFiltro = findViewById(R.id.spFiltroOrden);
+
+        ArrayAdapter<CharSequence> spinnerAdapter = ArrayAdapter.createFromResource(this,
+                R.array.filtroOrdenEntries, android.R.layout.simple_spinner_item);
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spFiltro.setAdapter(spinnerAdapter);
+
+        spFiltro.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                cargarResultados();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+
+        etBuscar.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                cargarResultados();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+
         cargarResultados();
     }
 
     private void cargarResultados() {
-        repository.getTop10(resultados -> {
+        EditText etBuscar = findViewById(R.id.etBuscarNombre);
+        Spinner spFiltro = findViewById(R.id.spFiltroOrden);
+
+        String textoBusqueda = etBuscar != null && etBuscar.getText() != null ? etBuscar.getText().toString().trim() : "";
+        int opcionFiltro = spFiltro != null ? spFiltro.getSelectedItemPosition() : 0;
+
+        ResultadoRepository.Callback<List<Resultado>> callback = resultados -> {
             if (resultados == null || resultados.isEmpty()) {
                 tvSinResultados.setVisibility(View.VISIBLE);
                 rvResultados.setVisibility(View.GONE);
@@ -59,7 +105,15 @@ public class MejoresResultadosActivity extends AppCompatActivity {
                 rvResultados.setVisibility(View.VISIBLE);
                 adapter.setResultados(resultados);
             }
-        });
+        };
+
+        if (!textoBusqueda.isEmpty()) {
+            repository.getResultadosPorNombre(textoBusqueda, callback);
+        } else if (opcionFiltro == 1) {
+            repository.getTop10PorJugador1(callback);
+        } else {
+            repository.getTop10(callback);
+        }
     }
 
     @Override

@@ -47,6 +47,14 @@
                 android:text="01/01/2025 12:00"
                 android:textColor="@android:color/darker_gray"
                 android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/tvTiempo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tiempo: 01:23"
+                android:textColor="@android:color/darker_gray"
+                android:textSize="12sp" />
         </LinearLayout>
 
         <TextView
