@@ -1,0 +1,91 @@
+
+1. DESCRIPCIÓN GENERAL DEL PROYECTO
+------------------------------------------------------------------------
+Esta aplicación es una versión completa para Android del juego tradicional
+Bantumi enfrentando a un jugador humano (Jugador 1)
+contra la propia aplicación (Jugador 2 ).
+
+
+------------------------------------------------------------------------
+2. FUNCIONALIDADES OBLIGATORIAS E IMPLEMENTADAS
+------------------------------------------------------------------------
+
+2.1. REINICIAR PARTIDA
+- Opción "Reiniciar" en el menú superior.
+- Muestra un diálogo modal de confirmación (ReiniciarAlertDialog).
+- Al aceptar, reinicia el tablero y aplica la configuración de preferencias activa
+  (número de semillas y turno inicial).
+- Resetea el cronómetro a 00:00 hasta la siguiente jugada.
+
+2.2. GUARDAR Y RECUPERAR PARTIDA (FICHEROS EN ALMACENAMIENTO INTERNO)
+- Guardar Partida:
+  * Solicita un nombre descriptivo para la partida mediante un diálogo modal.
+  * Serializa el turno actual, número de semillas en cada una de las 14 posiciones
+    y tiempo transcurrido en formato CSV dentro del almacenamiento privado.
+- Recuperar Partida:
+  * Lista las partidas guardadas mediante un diálogo modal.
+  * Si la partida actual está modificada, solicita confirmación antes de sobrescribirla.
+  * Restaura completamente el estado del juego, los contadores, el cronómetro y los
+    observadores LiveData de la interfaz.
+
+2.3. PREFERENCIAS DEL JUEGO (AJUSTES)
+- Pantalla de ajustes accesible mediante la opción "Ajustes" (`BantumiPrefsActivity` y
+  `BantumiPrefsFragment` heredando de `PreferenceFragmentCompat`).
+- Permite personalizar:
+  * Nombre del jugador (EditTextPreference): Se actualiza e ilustra en vivo en el tablero
+    al volver de la pantalla de ajustes.
+  * Número inicial de semillas (ListPreference): Opciones de 2, 3, 4, 5 y 6 semillas.
+  * Jugador que inicia (ListPreference): Permite elegir entre Jugador 1 y Jugador 2 (CPU).
+
+2.4. BASE DE DATOS ROOM (GUARDAR PUNTUACIÓN Y MEJORES RESULTADOS)
+- Implementación de la librería de persistencia AndroidX Room:
+  * Entidad `Resultado`: ID autoincremental, nombre del jugador, fecha y hora de la partida,
+    semillas conseguidas por el Jugador 1, semillas de la CPU y tiempo de partida.
+  * DAO `ResultadoDao`: Métodos de inserción, consultas ordenadas y borrado total.
+  * Repositorio `ResultadoRepository`: Ejecuta todas las operaciones en segundo plano
+    utilizando `ExecutorService` (Java clásico) evitando bloquear el hilo principal (UI).
+- Guardado Automático:
+  * Al finalizar la partida, se registra automáticamente la puntuación y el tiempo sin
+    duplicar entradas (protección `finJuegoProcesado`).
+
+2.5. HISTÓRICO Y MEJORES RESULTADOS
+- Pantalla `MejoresResultadosActivity` con tarjetas `MaterialCardView` en un `RecyclerView`.
+- Muestra el histórico con las 10 mejores partidas registradas.
+- Incluye la opción de menú con diálogo de confirmación para eliminar todo el histórico.
+
+------------------------------------------------------------------------
+3. FUNCIONALIDADES OPCIONALES Y MEJORAS AVANZADAS
+------------------------------------------------------------------------
+
+3.1. CRONÓMETRO DE PARTIDA EN TIEMPO REAL
+- Añadido un componente `Chronometer` centrado en el tablero (`activity_main.xml`).
+- Detección inteligente de inicio: El cronómetro permanece detenido en 00:00 al iniciar
+  o reiniciar la partida, y COMIENZA A CONTAR ÚNICAMENTE en el instante en que se
+  realiza el primer movimiento de la partida (humano o CPU).
+- Al terminar la partida, se congela y guarda el tiempo exacto en Room.
+
+3.2. MARCADO DE LA ÚLTIMA CASILLA ELEGIDA (JUGABILIDAD)
+- Destaca visualmente la última casilla jugada en el movimiento anterior (tanto si la
+  ha seleccionado el usuario como si la ha elegido la CPU) modificando su opacidad.
+- Se limpia y actualiza dinámicamente con cada jugada.
+
+3.3. MÚLTIPLES PARTIDAS GUARDADAS
+- Admite guardar múltiples estados de partidas asignándoles nombres personalizados.
+- Al seleccionar "Recuperar Partida", el usuario puede elegir de una lista desplegable
+  cuál de las partidas guardadas desea recuperar.
+
+3.4. FILTROS Y BÚSQUEDA EN MEJORES RESULTADOS
+- Búsqueda en tiempo real por nombre de jugador mediante un campo de texto `EditText`.
+- Selector `Spinner` para alternar la ordenación entre:
+  * "Top Máximo": Ordenado por la máxima puntuación obtenida en el juego.
+  * "Top Jugador 1": Ordenado por las semillas conseguidas por el jugador humano.
+
+3.5. PERSONALIZACIÓN DE TEMAS DE COLOR EN VIVO
+- Preferencia `ListPreference` en la pantalla de Ajustes para elegir el tema visual:
+  * Estándar (Predeterminado)
+  * Rojo
+  * Verde
+  * Morado
+  * Multicolor
+- Aplica dinámicamente el color mediante `setBackgroundTintList` tanto a los números
+  de puntuación como a los botones de las casillas ("cuencos") del tablero.
